@@ -25,7 +25,7 @@ const AdminCourses = () => {
     <div className="p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Course Management</h1>
-        <p className="text-gray-500">Manage all courses offered at the coaching center</p>
+        <p className="text-muted-foreground">Manage all courses offered at the coaching center</p>
       </div>
 
       <Card>

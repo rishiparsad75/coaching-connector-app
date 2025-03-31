@@ -1,18 +1,54 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const AdminSettings = () => {
+  const { toast } = useToast();
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+  });
+
+  const handleThemeChange = (value: string) => {
+    const newTheme = value as 'light' | 'dark' | 'system';
+    if (newTheme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      setTheme(systemTheme);
+      if (systemTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      localStorage.setItem('theme', 'system');
+    } else {
+      setTheme(newTheme);
+      if (newTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      localStorage.setItem('theme', newTheme);
+    }
+  };
+
+  const saveChanges = () => {
+    toast({
+      title: "Settings saved",
+      description: "Your settings have been successfully updated.",
+    });
+  };
+
   return (
     <div className="p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Admin Settings</h1>
-        <p className="text-gray-500">Configure system settings for the coaching center</p>
+        <p className="text-muted-foreground">Configure system settings for the coaching center</p>
       </div>
 
       <Tabs defaultValue="general">
@@ -46,7 +82,7 @@ const AdminSettings = () => {
                 <Label htmlFor="address">Address</Label>
                 <Input id="address" defaultValue="123 Education Street, Knowledge City" />
               </div>
-              <Button>Save Changes</Button>
+              <Button onClick={saveChanges}>Save Changes</Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -61,25 +97,25 @@ const AdminSettings = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium">Email Notifications</h3>
-                  <p className="text-sm text-gray-500">Send email notifications to students</p>
+                  <p className="text-sm text-muted-foreground">Send email notifications to students</p>
                 </div>
                 <Switch defaultChecked />
               </div>
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium">SMS Notifications</h3>
-                  <p className="text-sm text-gray-500">Send SMS alerts for important events</p>
+                  <p className="text-sm text-muted-foreground">Send SMS alerts for important events</p>
                 </div>
                 <Switch defaultChecked />
               </div>
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium">Attendance Alerts</h3>
-                  <p className="text-sm text-gray-500">Send alerts when attendance falls below threshold</p>
+                  <p className="text-sm text-muted-foreground">Send alerts when attendance falls below threshold</p>
                 </div>
                 <Switch defaultChecked />
               </div>
-              <Button>Save Changes</Button>
+              <Button onClick={saveChanges}>Save Changes</Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -94,14 +130,14 @@ const AdminSettings = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium">Two-Factor Authentication</h3>
-                  <p className="text-sm text-gray-500">Require 2FA for admin accounts</p>
+                  <p className="text-sm text-muted-foreground">Require 2FA for admin accounts</p>
                 </div>
                 <Switch />
               </div>
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium">Password Expiry</h3>
-                  <p className="text-sm text-gray-500">Force password reset every 90 days</p>
+                  <p className="text-sm text-muted-foreground">Force password reset every 90 days</p>
                 </div>
                 <Switch defaultChecked />
               </div>
@@ -109,7 +145,7 @@ const AdminSettings = () => {
                 <Label htmlFor="session-timeout">Session Timeout (minutes)</Label>
                 <Input id="session-timeout" type="number" defaultValue="60" />
               </div>
-              <Button>Save Changes</Button>
+              <Button onClick={saveChanges}>Save Changes</Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -123,17 +159,22 @@ const AdminSettings = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="theme">Theme</Label>
-                <select id="theme" className="w-full p-2 border rounded">
-                  <option>Light</option>
-                  <option>Dark</option>
-                  <option>System</option>
-                </select>
+                <Select defaultValue={theme} onValueChange={handleThemeChange}>
+                  <SelectTrigger id="theme">
+                    <SelectValue placeholder="Select theme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">Light</SelectItem>
+                    <SelectItem value="dark">Dark</SelectItem>
+                    <SelectItem value="system">System</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="primary-color">Primary Color</Label>
                 <Input id="primary-color" type="color" defaultValue="#0066cc" />
               </div>
-              <Button>Save Changes</Button>
+              <Button onClick={saveChanges}>Save Changes</Button>
             </CardContent>
           </Card>
         </TabsContent>

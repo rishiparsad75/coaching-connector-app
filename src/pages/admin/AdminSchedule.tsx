@@ -25,7 +25,7 @@ const AdminSchedule = () => {
     <div className="p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Schedule Management</h1>
-        <p className="text-gray-500">Manage class schedules for the coaching center</p>
+        <p className="text-muted-foreground">Manage class schedules for the coaching center</p>
       </div>
 
       <Card>
