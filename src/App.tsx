@@ -14,6 +14,10 @@ import Attendance from "./pages/Attendance";
 import OnlineClasses from "./pages/OnlineClasses";
 import Login from "./pages/Login";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminStudents from "./pages/admin/AdminStudents";
+import AdminCourses from "./pages/admin/AdminCourses";
+import AdminSchedule from "./pages/admin/AdminSchedule";
+import AdminSettings from "./pages/admin/AdminSettings";
 import CoachingLayout from "./components/layout/CoachingLayout";
 import AdminLayout from "./components/layout/AdminLayout";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -43,22 +47,66 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="/admin/students" 
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminLayout>
+                    <AdminStudents />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/courses" 
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminLayout>
+                    <AdminCourses />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/schedule" 
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminLayout>
+                    <AdminSchedule />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/settings" 
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminLayout>
+                    <AdminSettings />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
             
             {/* Student routes - require authentication */}
             <Route 
               path="/" 
               element={
-                <CoachingLayout>
-                  <Dashboard />
-                </CoachingLayout>
+                <ProtectedRoute>
+                  <CoachingLayout>
+                    <Dashboard />
+                  </CoachingLayout>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/courses" 
               element={
-                <CoachingLayout>
-                  <Courses />
-                </CoachingLayout>
+                <ProtectedRoute>
+                  <CoachingLayout>
+                    <Courses />
+                  </CoachingLayout>
+                </ProtectedRoute>
               } 
             />
             <Route 
@@ -74,33 +122,41 @@ const App = () => (
             <Route 
               path="/schedule" 
               element={
-                <CoachingLayout>
-                  <Schedule />
-                </CoachingLayout>
+                <ProtectedRoute>
+                  <CoachingLayout>
+                    <Schedule />
+                  </CoachingLayout>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/attendance" 
               element={
-                <CoachingLayout>
-                  <Attendance />
-                </CoachingLayout>
+                <ProtectedRoute>
+                  <CoachingLayout>
+                    <Attendance />
+                  </CoachingLayout>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/online-classes" 
               element={
-                <CoachingLayout>
-                  <OnlineClasses />
-                </CoachingLayout>
+                <ProtectedRoute>
+                  <CoachingLayout>
+                    <OnlineClasses />
+                  </CoachingLayout>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/about" 
               element={
-                <CoachingLayout>
-                  <Index />
-                </CoachingLayout>
+                <ProtectedRoute>
+                  <CoachingLayout>
+                    <Index />
+                  </CoachingLayout>
+                </ProtectedRoute>
               } 
             />
             
