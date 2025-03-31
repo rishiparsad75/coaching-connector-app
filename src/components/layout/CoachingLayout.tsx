@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
   LayoutDashboard, 
@@ -11,8 +11,12 @@ import {
   Info, 
   Menu, 
   X,
-  Video
+  Video,
+  LogIn,
+  LogOut
 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface NavItemProps {
   to: string;
@@ -39,9 +43,21 @@ const NavItem = ({ to, icon, label, active, onClick }: NavItemProps) => (
 const CoachingLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
   
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
   const closeMobileMenu = () => setMobileMenuOpen(false);
+  
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out.",
+    });
+    closeMobileMenu();
+  };
   
   const navItems = [
     { to: '/', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
@@ -65,14 +81,43 @@ const CoachingLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =
             </Link>
           </div>
           
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="md:hidden" 
-            onClick={toggleMobileMenu}
-          >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </Button>
+          <div className="flex items-center gap-2">
+            {isAuthenticated ? (
+              <>
+                <div className="hidden md:block mr-2">
+                  <span className="text-sm">Hello, {user?.name}</span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleLogout}
+                  className="hidden md:flex items-center gap-1"
+                >
+                  <LogOut size={16} />
+                  <span>Logout</span>
+                </Button>
+              </>
+            ) : (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => navigate('/login')}
+                className="hidden md:flex items-center gap-1"
+              >
+                <LogIn size={16} />
+                <span>Login</span>
+              </Button>
+            )}
+            
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="md:hidden" 
+              onClick={toggleMobileMenu}
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </Button>
+          </div>
         </div>
       </header>
       
@@ -89,6 +134,24 @@ const CoachingLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =
                 active={location.pathname === item.to}
               />
             ))}
+            
+            {isAuthenticated ? (
+              user?.role === 'admin' && (
+                <NavItem
+                  to="/admin"
+                  icon={<LayoutDashboard size={20} />}
+                  label="Admin Panel"
+                  active={false}
+                />
+              )
+            ) : (
+              <NavItem
+                to="/login"
+                icon={<LogIn size={20} />}
+                label="Login"
+                active={location.pathname === '/login'}
+              />
+            )}
           </nav>
         </aside>
         
@@ -107,6 +170,36 @@ const CoachingLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =
                     onClick={closeMobileMenu}
                   />
                 ))}
+                
+                {isAuthenticated ? (
+                  <>
+                    {user?.role === 'admin' && (
+                      <NavItem
+                        to="/admin"
+                        icon={<LayoutDashboard size={20} />}
+                        label="Admin Panel"
+                        active={false}
+                        onClick={closeMobileMenu}
+                      />
+                    )}
+                    <Button
+                      variant="destructive"
+                      className="w-full justify-start gap-2 mt-4"
+                      onClick={handleLogout}
+                    >
+                      <LogOut size={20} />
+                      <span>Logout</span>
+                    </Button>
+                  </>
+                ) : (
+                  <NavItem
+                    to="/login"
+                    icon={<LogIn size={20} />}
+                    label="Login"
+                    active={location.pathname === '/login'}
+                    onClick={closeMobileMenu}
+                  />
+                )}
               </nav>
             </div>
           </div>
