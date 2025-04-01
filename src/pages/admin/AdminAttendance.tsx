@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
@@ -17,8 +16,8 @@ import { Badge } from '@/components/ui/badge';
 import { Check, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { useIsMobile } from '@/hooks/use-mobile';
 
-// Mock data for students
 const mockStudents = [
   { id: '1', name: 'John Doe', class: 'Class 10', email: 'john@example.com' },
   { id: '2', name: 'Jane Smith', class: 'Class 12', email: 'jane@example.com' },
@@ -28,7 +27,6 @@ const mockStudents = [
   { id: '6', name: 'Emily Davis', class: 'Class 11', email: 'emily@example.com' },
 ];
 
-// Mock data for courses
 const mockCourses = [
   { id: '1', name: 'Mathematics' },
   { id: '2', name: 'Physics' },
@@ -38,7 +36,6 @@ const mockCourses = [
   { id: '6', name: 'Computer Science' },
 ];
 
-// Mock data for attendance
 const mockAttendance = {
   '2023-05-10': {
     '1': { // Course ID
@@ -76,12 +73,12 @@ const AdminAttendance = () => {
   const [attendanceData, setAttendanceData] = useState<any>(mockAttendance);
   const [studentAttendance, setStudentAttendance] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const formatDate = (date?: Date) => {
     return date ? format(date, 'yyyy-MM-dd') : '';
   };
 
-  // Load attendance data for selected date and course
   React.useEffect(() => {
     if (selectedDate && selectedCourse) {
       const dateKey = formatDate(selectedDate);
@@ -155,17 +152,17 @@ const AdminAttendance = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Attendance Management</h1>
+    <div className="p-4 md:p-6">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold">Attendance Management</h1>
         <p className="text-muted-foreground">Manage student attendance for all classes</p>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-        <div className="md:col-span-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
+        <div className="lg:col-span-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Select Date & Course</CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg md:text-xl">Select Date & Course</CardTitle>
               <CardDescription>Choose a date and course to manage attendance</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -175,14 +172,16 @@ const AdminAttendance = () => {
                   mode="single"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
-                  className="rounded-md border"
+                  className="rounded-md border w-full max-w-full"
+                  showOutsideDays={false}
+                  disabled={(date) => date > new Date()}
                 />
               </div>
               
               <div>
                 <h3 className="mb-2 font-medium">Course</h3>
                 <Select value={selectedCourse} onValueChange={setSelectedCourse}>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select course" />
                   </SelectTrigger>
                   <SelectContent>
@@ -196,73 +195,78 @@ const AdminAttendance = () => {
           </Card>
         </div>
         
-        <div className="md:col-span-8">
-          <Tabs defaultValue="mark">
-            <TabsList className="mb-4">
-              <TabsTrigger value="mark">Mark Attendance</TabsTrigger>
-              <TabsTrigger value="reports">Attendance Reports</TabsTrigger>
+        <div className="lg:col-span-8">
+          <Tabs defaultValue="mark" className="w-full">
+            <TabsList className="mb-4 w-full sm:w-auto">
+              <TabsTrigger value="mark" className="flex-1 sm:flex-none">Mark Attendance</TabsTrigger>
+              <TabsTrigger value="reports" className="flex-1 sm:flex-none">Attendance Reports</TabsTrigger>
             </TabsList>
             
             <TabsContent value="mark">
               <Card>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
+                <CardHeader className="pb-3">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
                     <div>
-                      <CardTitle>
-                        Attendance for {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Today'}
+                      <CardTitle className="text-lg md:text-xl">
+                        {selectedDate ? format(selectedDate, 'MMM d, yyyy') : 'Today'}
                       </CardTitle>
                       <CardDescription>
                         {mockCourses.find(c => c.id === selectedCourse)?.name || 'Select a course'}
                       </CardDescription>
                     </div>
-                    <div className="flex space-x-2">
-                      <Button variant="outline" size="sm" onClick={markAllPresent}>
-                        Mark All Present
+                    <div className="flex flex-wrap gap-2">
+                      <Button variant="outline" size={isMobile ? "sm" : "default"} className="text-xs sm:text-sm" onClick={markAllPresent}>
+                        All Present
                       </Button>
-                      <Button variant="outline" size="sm" onClick={markAllAbsent}>
-                        Mark All Absent
+                      <Button variant="outline" size={isMobile ? "sm" : "default"} className="text-xs sm:text-sm" onClick={markAllAbsent}>
+                        All Absent
                       </Button>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Class</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Action</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {mockStudents.map(student => (
-                        <TableRow key={student.id}>
-                          <TableCell className="font-medium">{student.name}</TableCell>
-                          <TableCell>{student.class}</TableCell>
-                          <TableCell>
-                            {studentAttendance[student.id] !== undefined ? (
-                              <Badge variant={studentAttendance[student.id] ? "outline" : "destructive"}>
-                                {studentAttendance[student.id] ? 'Present' : 'Absent'}
-                              </Badge>
-                            ) : (
-                              <Badge variant="secondary">Not Marked</Badge>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleToggleAttendance(student.id)}
-                              className={studentAttendance[student.id] ? "text-destructive" : "text-primary"}
-                            >
-                              {studentAttendance[student.id] ? 'Mark Absent' : 'Mark Present'}
-                            </Button>
-                          </TableCell>
+                  <div className="overflow-x-auto -mx-4 md:mx-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          {!isMobile && <TableHead>Class</TableHead>}
+                          <TableHead>Status</TableHead>
+                          <TableHead className="text-right">Action</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {mockStudents.map(student => (
+                          <TableRow key={student.id}>
+                            <TableCell className="font-medium">
+                              {student.name}
+                              {isMobile && <div className="text-xs text-muted-foreground mt-1">{student.class}</div>}
+                            </TableCell>
+                            {!isMobile && <TableCell>{student.class}</TableCell>}
+                            <TableCell>
+                              {studentAttendance[student.id] !== undefined ? (
+                                <Badge variant={studentAttendance[student.id] ? "outline" : "destructive"} className="whitespace-nowrap">
+                                  {studentAttendance[student.id] ? 'Present' : 'Absent'}
+                                </Badge>
+                              ) : (
+                                <Badge variant="secondary" className="whitespace-nowrap">Not Marked</Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => handleToggleAttendance(student.id)}
+                                className={`text-xs sm:text-sm ${studentAttendance[student.id] ? "text-destructive" : "text-primary"}`}
+                              >
+                                {studentAttendance[student.id] ? 'Mark Absent' : 'Mark Present'}
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                   
                   <div className="mt-4 flex justify-end">
                     <Button onClick={saveAttendance}>Save Attendance</Button>
@@ -273,42 +277,47 @@ const AdminAttendance = () => {
             
             <TabsContent value="reports">
               <Card>
-                <CardHeader>
-                  <CardTitle>Attendance Reports</CardTitle>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg md:text-xl">Attendance Reports</CardTitle>
                   <CardDescription>Overall attendance statistics for all students</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Class</TableHead>
-                        <TableHead>Attendance %</TableHead>
-                        <TableHead>Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {mockStudents.map(student => {
-                        const attendancePercent = getAttendancePercentage(student.id);
-                        return (
-                          <TableRow key={student.id}>
-                            <TableCell className="font-medium">{student.name}</TableCell>
-                            <TableCell>{student.class}</TableCell>
-                            <TableCell>{attendancePercent}%</TableCell>
-                            <TableCell>
-                              {attendancePercent >= 80 ? (
-                                <Badge className="bg-green-100 text-green-800">Good</Badge>
-                              ) : attendancePercent >= 60 ? (
-                                <Badge className="bg-yellow-100 text-yellow-800">Average</Badge>
-                              ) : (
-                                <Badge className="bg-red-100 text-red-800">Poor</Badge>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
+                  <div className="overflow-x-auto -mx-4 md:mx-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          {!isMobile && <TableHead>Class</TableHead>}
+                          <TableHead>Attendance %</TableHead>
+                          <TableHead>Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {mockStudents.map(student => {
+                          const attendancePercent = getAttendancePercentage(student.id);
+                          return (
+                            <TableRow key={student.id}>
+                              <TableCell className="font-medium">
+                                {student.name}
+                                {isMobile && <div className="text-xs text-muted-foreground mt-1">{student.class}</div>}
+                              </TableCell>
+                              {!isMobile && <TableCell>{student.class}</TableCell>}
+                              <TableCell>{attendancePercent}%</TableCell>
+                              <TableCell>
+                                {attendancePercent >= 80 ? (
+                                  <Badge className="bg-green-100 text-green-800">Good</Badge>
+                                ) : attendancePercent >= 60 ? (
+                                  <Badge className="bg-yellow-100 text-yellow-800">Average</Badge>
+                                ) : (
+                                  <Badge className="bg-red-100 text-red-800">Poor</Badge>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
