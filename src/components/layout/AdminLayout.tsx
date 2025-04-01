@@ -2,9 +2,13 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Users, BookOpen, Calendar, Settings, LogOut, Moon, Sun } from 'lucide-react';
+import { LayoutDashboard, Users, BookOpen, Calendar, Settings, LogOut, Moon, Sun, ClipboardCheck, UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, logout } = useAuth();
@@ -15,6 +19,13 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return (savedTheme === 'dark' || 
            (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) 
            ? 'dark' : 'light';
+  });
+  const [isCreateAccountOpen, setIsCreateAccountOpen] = useState(false);
+  const [newUser, setNewUser] = useState({
+    name: '',
+    email: '',
+    password: '',
+    role: 'student'
   });
 
   useEffect(() => {
@@ -40,6 +51,21 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     toast({
       title: "Logged out",
       description: "You have been successfully logged out.",
+    });
+  };
+
+  const handleCreateAccount = () => {
+    // In a real app, this would call an API to create the account
+    toast({
+      title: "Account Created",
+      description: `New ${newUser.role} account created for ${newUser.name}.`,
+    });
+    setIsCreateAccountOpen(false);
+    setNewUser({
+      name: '',
+      email: '',
+      password: '',
+      role: 'student'
     });
   };
 
@@ -90,6 +116,12 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 Schedule
               </Button>
             </Link>
+            <Link to="/admin/attendance">
+              <Button variant="ghost" className="w-full justify-start text-sidebar-foreground bg-sidebar-accent/0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+                <ClipboardCheck className="mr-2" size={18} />
+                Attendance
+              </Button>
+            </Link>
             <Link to="/admin/settings">
               <Button variant="ghost" className="w-full justify-start text-sidebar-foreground bg-sidebar-accent/0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
                 <Settings className="mr-2" size={18} />
@@ -97,6 +129,17 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               </Button>
             </Link>
           </nav>
+
+          <div className="mt-4 pt-4 border-t border-sidebar-border">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => setIsCreateAccountOpen(true)}
+            >
+              <UserPlus className="mr-2" size={18} />
+              Create Account
+            </Button>
+          </div>
         </div>
         
         <div className="p-4 mt-auto border-t border-sidebar-border absolute bottom-0 w-64">
@@ -158,6 +201,78 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           {children}
         </main>
       </div>
+
+      {/* Create Account Dialog */}
+      <Dialog open={isCreateAccountOpen} onOpenChange={setIsCreateAccountOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Account</DialogTitle>
+            <DialogDescription>
+              Add a new student or admin account to the system.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Full Name
+              </Label>
+              <Input
+                id="name"
+                value={newUser.name}
+                onChange={(e) => setNewUser({...newUser, name: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="email" className="text-right">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={newUser.email}
+                onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="password" className="text-right">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={newUser.password}
+                onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="role" className="text-right">
+                Role
+              </Label>
+              <Select 
+                value={newUser.role} 
+                onValueChange={(value) => setNewUser({...newUser, role: value})}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="student">Student</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreateAccountOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateAccount}>Create Account</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

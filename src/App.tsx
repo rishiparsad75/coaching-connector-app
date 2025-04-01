@@ -18,6 +18,7 @@ import AdminStudents from "./pages/admin/AdminStudents";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminSchedule from "./pages/admin/AdminSchedule";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminAttendance from "./pages/admin/AdminAttendance";
 import CoachingLayout from "./components/layout/CoachingLayout";
 import AdminLayout from "./components/layout/AdminLayout";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -73,6 +74,16 @@ const App = () => (
                 <ProtectedRoute requiredRole="admin">
                   <AdminLayout>
                     <AdminSchedule />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/attendance" 
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminLayout>
+                    <AdminAttendance />
                   </AdminLayout>
                 </ProtectedRoute>
               } 
