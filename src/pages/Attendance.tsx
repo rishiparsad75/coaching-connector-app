@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,6 +11,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Progress } from '@/components/ui/progress';
 import { format, subDays, addDays } from 'date-fns';
 import { Check, Search, Calendar as CalendarIcon, BarChart, Filter, Download, X, ChevronRight, ChevronLeft } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Sample students data
 const studentsData = [
@@ -86,7 +86,8 @@ const studentStats = [
 ];
 
 const Attendance = () => {
-  const [activeTab, setActiveTab] = useState('mark');
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState(user?.role === 'admin' ? 'mark' : 'history');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedClass, setSelectedClass] = useState('Mathematics');
   const [students, setStudents] = useState(studentsData);
@@ -115,120 +116,122 @@ const Attendance = () => {
     student.rollNo.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const isAdmin = user?.role === 'admin';
+
   return (
     <div className="coaching-container">
       <h1 className="page-title">Attendance Management</h1>
       
-      <Tabs defaultValue="mark" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 mb-6">
-          <TabsTrigger value="mark">Mark Attendance</TabsTrigger>
+      <Tabs defaultValue={isAdmin ? "mark" : "history"} value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className={`grid w-full grid-cols-1 ${isAdmin ? 'md:grid-cols-3' : 'md:grid-cols-2'} mb-6`}>
+          {isAdmin && <TabsTrigger value="mark">Mark Attendance</TabsTrigger>}
           <TabsTrigger value="history">Attendance Records</TabsTrigger>
           <TabsTrigger value="stats">Student Statistics</TabsTrigger>
         </TabsList>
         
-        {/* Mark Attendance Tab */}
-        <TabsContent value="mark">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="md:col-span-1">
-              <CardHeader>
-                <CardTitle>Select Date & Class</CardTitle>
-                <CardDescription>Mark attendance for a specific date and class</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label>Date</Label>
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={setSelectedDate}
-                    className="rounded-md border"
-                    disabled={{
-                      after: new Date(),
-                      before: subDays(new Date(), 7)
-                    }}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Select Class</Label>
-                  <select 
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    value={selectedClass}
-                    onChange={(e) => setSelectedClass(e.target.value)}
-                  >
-                    <option value="Mathematics">Mathematics</option>
-                    <option value="Physics">Physics</option>
-                    <option value="Chemistry">Chemistry</option>
-                    <option value="English">English</option>
-                    <option value="Computer Science">Computer Science</option>
-                  </select>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="md:col-span-2">
-              <CardHeader>
-                <CardTitle>
-                  {selectedClass} - {selectedDate ? format(selectedDate, 'EEEE, MMMM dd, yyyy') : 'Today'}
-                </CardTitle>
-                <CardDescription>Manage attendance for the selected class</CardDescription>
-                
-                <div className="w-full relative mt-2">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search students..."
-                    className="pl-8"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="border rounded-md">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[80px]">Roll No</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead className="text-right">Attendance</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredStudents.map(student => (
-                        <TableRow key={student.id}>
-                          <TableCell className="font-medium">{student.rollNo}</TableCell>
-                          <TableCell>{student.name}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end space-x-2">
-                              <Label htmlFor={`attendance-${student.id}`}>
-                                {student.present ? 'Present' : 'Absent'}
-                              </Label>
-                              <Switch
-                                id={`attendance-${student.id}`}
-                                checked={student.present}
-                                onCheckedChange={(checked) => handleAttendanceChange(student.id, checked)}
-                              />
-                            </div>
-                          </TableCell>
+        {isAdmin && (
+          <TabsContent value="mark">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="md:col-span-1">
+                <CardHeader>
+                  <CardTitle>Select Date & Class</CardTitle>
+                  <CardDescription>Mark attendance for a specific date and class</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label>Date</Label>
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={setSelectedDate}
+                      className="rounded-md border"
+                      disabled={{
+                        after: new Date(),
+                        before: subDays(new Date(), 7)
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Select Class</Label>
+                    <select 
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      value={selectedClass}
+                      onChange={(e) => setSelectedClass(e.target.value)}
+                    >
+                      <option value="Mathematics">Mathematics</option>
+                      <option value="Physics">Physics</option>
+                      <option value="Chemistry">Chemistry</option>
+                      <option value="English">English</option>
+                      <option value="Computer Science">Computer Science</option>
+                    </select>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="md:col-span-2">
+                <CardHeader>
+                  <CardTitle>
+                    {selectedClass} - {selectedDate ? format(selectedDate, 'EEEE, MMMM dd, yyyy') : 'Today'}
+                  </CardTitle>
+                  <CardDescription>Manage attendance for the selected class</CardDescription>
+                  
+                  <div className="w-full relative mt-2">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search students..."
+                      className="pl-8"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="border rounded-md">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[80px]">Roll No</TableHead>
+                          <TableHead>Name</TableHead>
+                          <TableHead className="text-right">Attendance</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <div>
-                  <span className="text-sm text-muted-foreground">
-                    Present: {students.filter(s => s.present).length}/{students.length}
-                  </span>
-                </div>
-                <Button>Save Attendance</Button>
-              </CardFooter>
-            </Card>
-          </div>
-        </TabsContent>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredStudents.map(student => (
+                          <TableRow key={student.id}>
+                            <TableCell className="font-medium">{student.rollNo}</TableCell>
+                            <TableCell>{student.name}</TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end space-x-2">
+                                <Label htmlFor={`attendance-${student.id}`}>
+                                  {student.present ? 'Present' : 'Absent'}
+                                </Label>
+                                <Switch
+                                  id={`attendance-${student.id}`}
+                                  checked={student.present}
+                                  onCheckedChange={(checked) => handleAttendanceChange(student.id, checked)}
+                                />
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <div>
+                    <span className="text-sm text-muted-foreground">
+                      Present: {students.filter(s => s.present).length}/{students.length}
+                    </span>
+                  </div>
+                  <Button>Save Attendance</Button>
+                </CardFooter>
+              </Card>
+            </div>
+          </TabsContent>
+        )}
         
-        {/* Attendance Records Tab */}
         <TabsContent value="history">
           <Card>
             <CardHeader>
@@ -298,7 +301,6 @@ const Attendance = () => {
           </Card>
         </TabsContent>
         
-        {/* Student Statistics Tab */}
         <TabsContent value="stats">
           <Card>
             <CardHeader>
