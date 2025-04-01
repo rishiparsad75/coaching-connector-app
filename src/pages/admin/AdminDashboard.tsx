@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
-import { Users, BookOpen, Calendar, ClipboardCheck } from 'lucide-react';
+import { Users, BookOpen, Calendar, ClipboardCheck, GraduationCap } from 'lucide-react';
 
 // Mock data for the admin dashboard
 const mockStudents = [
@@ -21,6 +21,15 @@ const mockCourses = [
   { id: '4', name: 'Biology', students: 28, instructor: 'Dr. Singh' },
 ];
 
+// Mock data for faculty
+const mockFaculty = [
+  { id: '1', name: 'Dr. Patel', department: 'Mathematics', qualification: 'PhD', experience: '15 years' },
+  { id: '2', name: 'Prof. Sharma', department: 'Physics', qualification: 'MSc', experience: '12 years' },
+  { id: '3', name: 'Dr. Gupta', department: 'Chemistry', qualification: 'PhD', experience: '10 years' },
+  { id: '4', name: 'Dr. Singh', department: 'Biology', qualification: 'PhD', experience: '8 years' },
+  { id: '5', name: 'Mrs. Verma', department: 'English', qualification: 'MA', experience: '9 years' },
+];
+
 const AdminDashboard = () => {
   const { user } = useAuth();
 
@@ -31,12 +40,20 @@ const AdminDashboard = () => {
         <p className="text-gray-500">Welcome back, {user?.name}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
         <Card>
           <CardContent className="p-6 flex flex-col items-center">
             <Users className="text-primary mb-2" size={24} />
             <p className="text-xl font-bold">145</p>
             <p className="text-muted-foreground text-sm">Total Students</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6 flex flex-col items-center">
+            <GraduationCap className="text-primary mb-2" size={24} />
+            <p className="text-xl font-bold">12</p>
+            <p className="text-muted-foreground text-sm">Faculty Members</p>
           </CardContent>
         </Card>
         
@@ -68,6 +85,7 @@ const AdminDashboard = () => {
       <Tabs defaultValue="students">
         <TabsList className="mb-4">
           <TabsTrigger value="students">Students</TabsTrigger>
+          <TabsTrigger value="faculty">Faculty</TabsTrigger>
           <TabsTrigger value="courses">Courses</TabsTrigger>
           <TabsTrigger value="schedule">Schedule</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
@@ -105,6 +123,39 @@ const AdminDashboard = () => {
                             {student.fees}
                           </span>
                         </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="faculty">
+          <Card>
+            <CardHeader>
+              <CardTitle>Faculty Management</CardTitle>
+              <CardDescription>View and manage all faculty members.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="px-4 py-2 text-left">Name</th>
+                      <th className="px-4 py-2 text-left">Department</th>
+                      <th className="px-4 py-2 text-left">Qualification</th>
+                      <th className="px-4 py-2 text-left">Experience</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {mockFaculty.map(faculty => (
+                      <tr key={faculty.id} className="border-b hover:bg-slate-50">
+                        <td className="px-4 py-3 font-medium">{faculty.name}</td>
+                        <td className="px-4 py-3">{faculty.department}</td>
+                        <td className="px-4 py-3">{faculty.qualification}</td>
+                        <td className="px-4 py-3">{faculty.experience}</td>
                       </tr>
                     ))}
                   </tbody>

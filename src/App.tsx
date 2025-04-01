@@ -15,6 +15,7 @@ import OnlineClasses from "./pages/OnlineClasses";
 import Login from "./pages/Login";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminStudents from "./pages/admin/AdminStudents";
+import AdminAddStudent from "./pages/admin/AdminAddStudent";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminSchedule from "./pages/admin/AdminSchedule";
 import AdminSettings from "./pages/admin/AdminSettings";
@@ -54,6 +55,16 @@ const App = () => (
                 <ProtectedRoute requiredRole="admin">
                   <AdminLayout>
                     <AdminStudents />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/add-student" 
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminLayout>
+                    <AdminAddStudent />
                   </AdminLayout>
                 </ProtectedRoute>
               } 
